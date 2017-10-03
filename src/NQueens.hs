@@ -1,7 +1,9 @@
 {-# LANGUAGE ParallelListComp #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module NQueens where
+module NQueens
+  ( nqueens
+  ) where
 
 import Data.SBV
 

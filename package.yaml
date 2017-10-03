@@ -7,12 +7,21 @@ github: TerrorJack/anubis
 
 extra-source-files:
   - LICENSE
+  - README.md
 
 dependencies:
   - base
+  - bytestring
+  - compact
+  - directory
   - sbv
+  - template-haskell
 
 ghc-options: -Wall
 
 library:
   source-dirs: src
+  other-extensions:
+    - ParallelListComp
+    - ScopedTypeVariables
+    - TemplateHaskell
