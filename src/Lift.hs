@@ -21,11 +21,13 @@ liftByteString bs =
       $(pure $ LitE $ StringPrimL $ BS.unpack bs)|]
 
 liftAnyWithCompact :: Typeable a => a -> Q Exp
-liftAnyWithCompact a = do
-  bs <-
-    runIO $ do
-      c <- compactWithSharing a
-      encodeCompact c
+liftAnyWithCompact a =
   [|unsafePerformIO $ do
-      c <- unsafeDecodeCompact $(liftByteString bs)
+      c <-
+        unsafeDecodeCompact
+          $(do bs <-
+                 runIO $ do
+                   c <- compactWithSharing a
+                   encodeCompact c
+               liftByteString bs)
       pure $ getCompact c|]
