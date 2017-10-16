@@ -13,8 +13,10 @@ dependencies:
   - base
   - bytestring
   - compact
+  - deepseq
   - directory
   - sbv
+  - singletons
   - template-haskell
 
 ghc-options: -Wall
