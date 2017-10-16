@@ -9,15 +9,19 @@
 
 module Vec where
 
+import qualified Data.Foldable as F
 import Data.Kind
 import Data.Singletons
 import Data.Singletons.TH
+import GHC.Exts
 
 data N
   = Z
   | S N
 
 $(genSingletons [''N])
+
+$(singDecideInstance ''N)
 
 data Vec :: N -> Type -> Type where
   VNil :: Vec 'Z t
@@ -47,3 +51,25 @@ instance SingI n => Applicative (Vec n) where
       SZ -> \VNil VNil -> VNil
       SS n1 ->
         withSingI n1 $ \(VCons f fs) (VCons x xs) -> VCons (f x) (fs <*> xs)
+
+data SomeVec t =
+  forall n. SingI n =>
+            SomeVec (Vec n t)
+
+instance IsList (SomeVec t) where
+  type Item (SomeVec t) = t
+  fromList [] = SomeVec VNil
+  fromList (x:xs) =
+    case fromList xs of
+      SomeVec v -> SomeVec (VCons x v)
+  toList (SomeVec v) = toList v
+
+instance SingI n => IsList (Vec n t) where
+  type Item (Vec n t) = t
+  fromList l =
+    case fromList l of
+      SomeVec (v :: Vec n1 t) ->
+        case (sing :: Sing n1) %~ (sing :: Sing n) of
+          Proved Refl -> v
+          Disproved _ -> error "Length mismatch"
+  toList = F.toList
