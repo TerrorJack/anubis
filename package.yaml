@@ -12,7 +12,9 @@ extra-source-files:
 dependencies:
   - base
   - bytestring
+  - Cabal
   - compact
+  - containers
   - deepseq
   - directory
   - sbv
@@ -24,6 +26,12 @@ ghc-options: -Wall
 library:
   source-dirs: src
   other-extensions:
+    - DataKinds
+    - DeriveTraversable
+    - GADTs
+    - KindSignatures
     - ParallelListComp
     - ScopedTypeVariables
+    - StandaloneDeriving
     - TemplateHaskell
+    - TypeFamilies

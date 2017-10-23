@@ -18,6 +18,7 @@ import GHC.Exts
 data N
   = Z
   | S N
+  deriving (Show)
 
 $(genSingletons [''N])
 
@@ -43,25 +44,27 @@ instance SingI n => Applicative (Vec n) where
   pure x =
     case sing :: Sing n of
       SZ -> VNil
-      SS n1 ->
-        case singInstance n1 of
-          SingInstance -> VCons x (pure x)
+      SS n1 -> withSingI n1 $ VCons x (pure x)
   (<*>) =
     case sing :: Sing n of
       SZ -> \VNil VNil -> VNil
       SS n1 ->
         withSingI n1 $ \(VCons f fs) (VCons x xs) -> VCons (f x) (fs <*> xs)
 
-data SomeVec t =
-  forall n. SingI n =>
-            SomeVec (Vec n t)
+data SomeVec :: Type -> Type where
+  SomeVec :: SingI n => Vec n t -> SomeVec t
+
+deriving instance Functor SomeVec
+
+deriving instance Foldable SomeVec
+
+deriving instance Traversable SomeVec
+
+deriving instance Show t => Show (SomeVec t)
 
 instance IsList (SomeVec t) where
   type Item (SomeVec t) = t
-  fromList [] = SomeVec VNil
-  fromList (x:xs) =
-    case fromList xs of
-      SomeVec v -> SomeVec (VCons x v)
+  fromList = foldr (\x (SomeVec xs) -> SomeVec (VCons x xs)) (SomeVec VNil)
   toList (SomeVec v) = toList v
 
 instance SingI n => IsList (Vec n t) where
@@ -71,5 +74,9 @@ instance SingI n => IsList (Vec n t) where
       SomeVec (v :: Vec n1 t) ->
         case (sing :: Sing n1) %~ (sing :: Sing n) of
           Proved Refl -> v
-          Disproved _ -> error "Length mismatch"
+          Disproved _ ->
+            error $
+            "Length mismatch when converting from List to Vec, expected " ++
+            show (fromSing (sing :: Sing n)) ++
+            ", got " ++ show (fromSing (sing :: Sing n1))
   toList = F.toList
