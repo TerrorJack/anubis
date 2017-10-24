@@ -17,6 +17,7 @@ dependencies:
   - containers
   - deepseq
   - directory
+  - primitive
   - sbv
   - singletons
   - template-haskell
@@ -26,8 +27,10 @@ ghc-options: -Wall
 library:
   source-dirs: src
   other-extensions:
+    - ConstraintKinds
     - DataKinds
     - DeriveTraversable
+    - FlexibleContexts
     - GADTs
     - KindSignatures
     - ParallelListComp
@@ -35,3 +38,4 @@ library:
     - StandaloneDeriving
     - TemplateHaskell
     - TypeFamilies
+    - TypeOperators
